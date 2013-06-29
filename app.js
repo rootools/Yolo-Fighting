@@ -3,7 +3,7 @@ gamepad.init();
 
 enchant();
 var game = new Game(1136, 640);
-game.preload(['ground2.png', 'titlebg.png','bg.jpg', 'pl4.png', 'ryu2.png', 'rick.png', 'troll.jpg', 's/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3', 's/mk.mp3']);
+game.preload(['ground2.png', 'titlebg1.png', 'press_start.png','bg.jpg', 'pl4.png', 'ryu2.png', 'rick.png', 'troll.jpg', 's/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3', 's/mk.mp3']);
 
 var Character = {
 
@@ -154,7 +154,7 @@ function titleScene(cb) {
   scene.backgroundColor = '000';
 
   var bg = new Sprite(1136, 640);
-  bg.image = game.assets['titlebg.png'];
+  bg.image = game.assets['titlebg1.png'];
   
   bg.opacity = 0;
   
@@ -172,34 +172,26 @@ function titleScene(cb) {
   game.assets['s/intro.mp3'].play();
 
   setTimeout(function(){
-    var label2 = new Label('Press START Button');
-    label2.width = '1136';
-    label2.y = '48';
-    label2.color = 'fff';
-    label2.font = '40px monospace';
-    label2.textAlign = 'center';
-    var aD = 0;
-    label2.addEventListener('enterframe', function(e) {
+    var press = new Sprite(371, 30);
+    press.image = game.assets['press_start.png'];
+    press.x = 380;
+    press.y = 480;
+  
+    var aD = 0
+    press.addEventListener('enterframe', function(e) {
       aD += e.elapsed;
       if (aD >= 500) {
-        if(label2.color === 'fff') {
-          label2.color = '000';
+        if(press.opacity === 1) {
+          press.opacity = 0;
         } else {
-          label2.color = 'fff';
+          press.opacity = 1;
         }
         aD = 0;
       }
     });
 
-    scene.addChild(label2);
+    scene.addChild(press);
 
-    var label = new Label('Use gamepad for the best user experience!');
-    label.width = '1136';
-    label.y = '55';
-    label.color = '#fff';
-    label.font = '40px monospace';
-    label.textAlign = 'center';
-    scene.addChild(label);
     gamepad.bind(Gamepad.Event.BUTTON_DOWN, function(e) {
       if(e.control === 'START') {
         game.popScene();
