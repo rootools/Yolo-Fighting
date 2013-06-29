@@ -6,80 +6,147 @@ var game = new Game(1136, 640);
 game.preload(['ground2.png', 'bg.jpg', 'pl4.png', 'ryu2.png', 'troll.jpg', 's/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3']);
 
 var Character = {
-	create: function() {
-		var char = new Sprite(67, 83);
-    char.image = game.assets['ryu2.png'];
-    char.scale(2, 2);
-  	char.y = 415;
-  	char.x = 30;
-  	char.speed = 10;
-  	char.jump = false;
-  	char.action = 'run';
-    char.HP = 100;
-  	char.animationDuration = 0;
-  	
-		return char;
-	},
-	
-	jump: function(char) {
-		char.action = 'jump';
-		char.jump = true;
-		char.tl.moveY(275, 7);
-    char.tl.moveY(415, 7);
-    setTimeout(function(){
-      char.jump = false;
-      char.action = 'run';
-    }, 200);
-	},
-	
-	attackHand: function(char) {
-		char.action = 'attackHand';
-	},
-  attackFoot: function(char) {
-    char.action = 'attackFoot';
-  },
-	moveRight: function(char) {
-		char.action = 'run';
-		char.moveRight = 1;
-    char.animationOffset = 0;
-	},
-	moveLeft: function(char) {
-		char.action = 'run';
-		char.moveLeft = 1;
-    char.animationOffset = 5;
-	},
-	moveStop: function(char) {
-		char.action = 'run';
-		char.moveRight = 0;
-		char.moveLeft = 0;
-	},
-	animationStand: function(char, e) {
-    char.animationDuration += e.elapsed;
-  		if (char.animationDuration >= 250) {
-        char.frame = (char.frame + 1) % 2;
-        char.animationDuration = 0;
-  		}
-	},
-  animationJump: function(char, e) {
-    game.assets['s/jump1.mp3'].play();
-    char.action = 'jump';
-    char.frame = 2;
-  },
-  animationAttackHand: function(char) {
-    game.assets['s/slap1.mp3'].play();
-    char.action = 'attackHand';
-    char.frame = 4;
-    setTimeout(function(){
-      char.action = 'run';
-    },200);
-  },
-  animationAttackFoot: function(char) {
-    game.assets['s/kick2.mp3'].play();
-    char.action = 'attackFoot';
-    char.frame = 3;
-    setTimeout(function(){
-      char.action = 'run';
-    }, 200);
+
+  init: function(pad, gamepad, scene) {
+
+    return {
+      pad: gamepad.gamepads[pad],
+      gamepad: gamepad,
+      scene: scene,
+
+      create: function() {
+        console.log(this);
+        this.sprite = new Sprite(67, 83);
+        this.sprite.image = game.assets['ryu2.png'];
+        this.sprite.scale(2, 2);
+        this.sprite.y = 415;
+        this.sprite.x = 30;
+        this.animationDuration = 0;
+        this.speed = 10;
+        this.jump = false;
+        this.attack = false;
+        this.action = 'run';
+        this.HP = 100;
+
+        this.scene.addChild(this.sprite);
+
+        var player = this;
+        this.sprite.addEventListener('enterframe', function(e) {
+
+          switch (player.action) {
+            case 'jump':
+              player.actionMove();
+              player.actionJump();
+            break;
+
+            case 'attackHand':
+              player.actionAttackHand();
+            break;
+
+            case 'attackFoot':
+              player.actionAttackFoot();
+            break;
+
+            default:
+              player.actionMove();
+              player.actionDefault(e);
+          }
+
+        });
+
+        return this;
+      },
+      
+      actionDefault: function(e) {
+        this.animationStand(e);
+      },
+
+      actionMove: function() {
+        switch (this.moveState) {
+          case 'right':
+            if (this.sprite.x < 1072) {
+              this.sprite.x += 10;
+            }
+          break;
+
+          case 'left':
+            if (this.sprite.x > 0) {
+              this.sprite.x -= 10;
+            }
+          break;
+        }
+
+        return true;
+      },
+
+      actionJump: function() {
+        if (!this.jump) {
+          this.jump = true;
+
+          var player = this;
+          setTimeout(function(){
+            console.log(player);
+            player.jump = false;
+            player.action = player.moveState ? 'run' : 'stop';
+          }, 200);
+        
+          this.animationJump();
+        }
+      },
+      
+      actionAttackHand: function() {
+        if (!this.attack) {
+          this.attack = true;
+
+          var player = this;
+          setTimeout(function(){
+            player.attack = false;
+            player.action = player.moveState ? 'run' : 'stop';
+          }, 200);
+
+          this.animationAttackHand();
+        }
+      },
+
+      actionAttackFoot: function() {
+        if (!this.attack) {
+          this.attack = true;
+
+          var player = this;
+          setTimeout(function(){
+            player.attack = false;
+            player.action = player.moveState ? 'run' : 'stop';
+          }, 200);
+
+          this.animationAttackFoot();
+        }
+      },
+
+
+      animationStand: function(e) {
+        this.animationDuration += e.elapsed;
+        if (this.animationDuration >= 250) {
+          this.sprite.frame = (this.sprite.frame + 1) % 2;
+          this.animationDuration = 0;
+        }
+      },
+      animationJump: function() {
+        game.assets['s/jump1.mp3'].play();
+        this.sprite.tl.moveY(275, 7);
+        this.sprite.frame = 2;
+        this.sprite.tl.moveY(415, 7);
+      },
+      animationAttackHand: function() {
+        game.assets['s/slap1.mp3'].play();
+        this.action = 'attackHand';
+        this.sprite.frame = 4;
+      },
+      animationAttackFoot: function() {
+        game.assets['s/kick2.mp3'].play();
+        this.action = 'attackFoot';
+        this.sprite.frame = 3;
+      }
+    }
   }
 };
 
@@ -130,91 +197,89 @@ function titleScene(cb) {
 }
 
 game.onload = function () {
-  titleScene(function() {
+ // titleScene(function() {
     var scene = new Scene();
 
     console.log(scene);  
     var bg = new Sprite(1136, 640);
     bg.image = game.assets['bg.jpg'];
-  	
-    scene.addChild(bg);
     
-    var player1 = Character.create();
-    scene.addChild(player1);
+    scene.addChild(bg);
+    window.players = [];
+    for (pad in gamepad.gamepads) {
+      var player = Character.init(pad, gamepad, scene);
+      players.push(player.create());
+    }
 
-    /*var player1_HP = new Label(player1.HP);
-    player1_HP.font = "30px cursive";
-    scene.addChild(player1_HP);*/
+    gamepad.bind(Gamepad.Event.BUTTON_DOWN, function(e) {
+      var player = null;
+      for (k in players) {
+        if (e.gamepad.id === players[k].pad.id) {
+          player = players[k];
+          break;
+        }
+      }
 
-    player1.addEventListener('enterframe', function(e) {
-    	if(player1.moveRight === 1 && player1.x < 1072) {
-    		player1.x += 10;
-    	}
-    	if(player1.moveLeft === 1 && player1.x > 0) {
-    		player1.x -= 10;
-    	}
-    	if(player1.action === 'run') {
-    		Character.animationStand(player1, e);
-    	}
-    	if(player1.action === 'stop') {
-    		Character.animationStand(player1, e);
-    	}
-      if(player1.action === 'jump') {
-        Character.animationJump(player1, e);
+      if (player === null) {
+        console.log(e);
+        return false;
       }
-      if(player1.action === 'attackHand') {
-        Character.animationAttackHand(player1);
+
+      switch (e.control) {
+        case 'DPAD_RIGHT':
+          player.moveState = 'right';
+        break;
+
+        case 'DPAD_LEFT':
+          player.moveState = 'left';
+        break;
+
+        case 'A':
+          if (!player.attack && !player.jump) {
+            player.action = 'jump';
+          }
+        break;
+
+        case 'X':
+          if (!player.attack) {
+            player.action = 'attackHand';
+          }
+        break;
+
+        case 'Y':
+          if (!player.attack) {
+            player.action = 'attackFoot';
+          }
+        break;
       }
-      if(player1.action === 'attackFoot') {
-        Character.animationAttackFoot(player1);
+
+    });
+
+    gamepad.bind(Gamepad.Event.BUTTON_UP, function(e) {
+      var player = null;
+      for (k in players) {
+        if (e.gamepad.id === players[k].pad.id) {
+          player = players[k];
+          break;
+        }
+      }
+
+      if (player === null) {
+        console.log(e);
+        return false;
+      }
+
+      switch (e.control) {
+        case 'DPAD_RIGHT':
+        case 'DPAD_LEFT':
+          player.moveState = false;
+        break;
       }
     });
 
-    gamepad.bind(Gamepad.Event.BUTTON_DOWN, function(e) {
-      if(e.control === 'DPAD_RIGHT') {
-    		Character.moveRight(player1);
-    	}
-    	if(e.control === 'DPAD_LEFT') {
-    		Character.moveLeft(player1);
-    	}
-    	if(e.control === 'X') {
-  			Character.attackHand(player1);
-  		}
-  		if(e.control === 'A') {
-      	if(player1.jump === false) {
-      		Character.jump(player1);
-      	}
-  		}
-  		if(e.control === 'Y') {
-  			Character.attackFoot(player1);	
-  		}
-
-  	});
-
-  	gamepad.bind(Gamepad.Event.BUTTON_UP, function(e) {
-    	if(e.control === 'DPAD_RIGHT') {
-    		Character.moveStop(player1);	
-    	}
-    	if(e.control === 'DPAD_LEFT') {
-    		Character.moveStop(player1);	
-    	}
-  	})
     game.pushScene(scene);
-  });
-	
+//  });
+  
 };
 
 game.start();
-
-/*  	if(e.axis === 'LEFT_STICK_X' || e.axis === 'LEFT_STICK_Y') {
-  		if(e.value > 0 && e.axis === 'LEFT_STICK_X') {
-  			ava.x += 5;
-  		} else if(e.value < 0 && e.axis === 'LEFT_STICK_X') {
-  			ava.x -= 5;
-  		} else if(e.value > 0 && e.axis === 'LEFT_STICK_Y') {
-  			ava.y += 5;
-  		} else if(e.value < 0 && e.axis === 'LEFT_STICK_Y') {
-  			ava.y -= 5;
-  		}
-  	}
-		console.log(e);*/
