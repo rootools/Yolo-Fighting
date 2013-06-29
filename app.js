@@ -234,7 +234,7 @@ game.onload = function () {
         scImg: game.assets['ryu.png'],
         scX: 300,
         way: 0,
-        frames: 10,
+        frames: 12,
       },
       {
         scH: 91,
