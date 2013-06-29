@@ -3,7 +3,7 @@ gamepad.init();
 
 enchant();
 var game = new Game(1136, 640);
-game.preload(['ground2.png', 'titlebg1.png', 'press_start.png','bg.jpg', 'pl4.png', 'ryu.png', 'rick.png', 'troll.jpg', 's/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3', 's/mk.mp3', 's/block.mp3', 's/death.mp3']);
+game.preload(['ground2.png', 'titlebg1.png', 'press_start.png','bg.jpg', 'pl4.png', 'ryu.png', 'rick.png', 'troll.jpg', 's/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3', 's/mk.mp3', 's/block.mp3', 's/death.mp3', 'andrew.png', 'const.png']);
 
 var Character = {
 
@@ -38,9 +38,13 @@ var Character = {
         this.hpLabel.x = params.hpLabelX;
         this.hpLabel.y = params.hpLabelY;
         this.hpLabel.font = '30px bold';
+        this.avatar = new Sprite(150, 150);
+        this.avatar.image = params.avatar;
+        this.avatar.x = params.avatarX;
 
         this.scene.addChild(this.sprite);
         this.scene.addChild(this.hpLabel);
+        this.scene.addChild(this.avatar);
 
         var player = this;
         this.sprite.addEventListener('enterframe', function(e) {
@@ -294,6 +298,7 @@ var Character = {
       },
       animationAttackHand: function() {
         if (this.isAttacked) {
+          this.avatar.frame = 1;
           game.assets['s/slap1.mp3'].play();
         } else if (this.heBlock) {
           game.assets['s/block.mp3'].play();
@@ -302,12 +307,14 @@ var Character = {
       },
       animationAttackMegaHand: function() {
         if (this.isAttacked) {
+          this.avatar.frame = 1;
           game.assets['s/slap1.mp3'].play();
         }
         this.sprite.frame = Math.abs(this.way*this.maxFrames - 6);
       },
       animationAttackFoot: function() {
         if (this.isAttacked) {
+          this.avatar.frame = 1;
           game.assets['s/kick2.mp3'].play();
         } else if (this.heBlock) {
           game.assets['s/block.mp3'].play();
@@ -315,6 +322,7 @@ var Character = {
         this.sprite.frame = Math.abs(this.way*this.maxFrames - 3);
       },
       animationUnAttack: function() {
+        this.avatar.frame = 0;
         if (this.isDead) {
           this.animationDead();
         } else if (this.jump) {
@@ -335,10 +343,12 @@ var Character = {
       },
       animationAttacked: function() {
         game.assets['s/slap1.mp3'].play();
+        this.avatar.frame = 2;
         this.sprite.frame = Math.abs(this.way*this.maxFrames - 7);
       },
       animationDead: function() {
         game.assets['s/death.mp3'].play();
+        this.avatar.frame = 3;
         this.sprite.frame = Math.abs(this.way*this.maxFrames - 10);
       },
     }
@@ -420,6 +430,8 @@ game.onload = function () {
         frames: 22,
         hpLabelX: 30,
         hpLabelY: 30,
+        avatar: game.assets['andrew.png'],
+        avatarX: 0
       },
       {
         scH: 91,
@@ -430,6 +442,8 @@ game.onload = function () {
         frames: 22,
         hpLabelX: 1030,
         hpLabelY: 30,
+        avatar: game.assets['const.png'],
+        avatarX: 985
       }
     ]
 
