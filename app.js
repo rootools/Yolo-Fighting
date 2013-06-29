@@ -13,6 +13,7 @@ var Character = {
       pad: params.gamepad.gamepads[params.pad],
       gamepad: params.gamepad,
       scene: params.scene,
+      sprite: null,
 
       create: function() {
         this.sprite = new Sprite(params.scW, params.scH);
@@ -20,8 +21,11 @@ var Character = {
         this.sprite.scale(2, 2);
         this.sprite.y = 415;
         this.sprite.x = params.scX;
+        this.sprite.frameParity = 0;
         this.animationDuration = 0;
         this.speed = 10;
+        this.maxFrames = params.frames - 1;
+        this.way = params.way;
         this.jump = false;
         this.attack = false;
         this.action = 'run';
@@ -61,15 +65,23 @@ var Character = {
       },
 
       actionMove: function() {
+        for (k in players) {
+          if (players[k].pad.id !== this.pad.id) {
+            this.way = (this.sprite.x > players[k].sprite.x);
+            this.deltaWay = Math.abs(this.sprite.x - players[k].sprite.x) - this.sprite.width/2 - players[k].sprite.width/2;
+          }
+        }
+
         switch (this.moveState) {
           case 'right':
-            if (this.sprite.x < 1072) {
+          console.log(this.deltaWay);
+            if (this.sprite.x < 1072 && (!(!this.way && this.deltaWay < 2) || this.jump)) {
               this.sprite.x += 10;
             }
           break;
 
           case 'left':
-            if (this.sprite.x > 0) {
+            if (this.sprite.x > 0 && (!(this.way && this.deltaWay < 2) || this.jump)) {
               this.sprite.x -= 10;
             }
           break;
@@ -124,25 +136,26 @@ var Character = {
       animationStand: function(e) {
         this.animationDuration += e.elapsed;
         if (this.animationDuration >= 250) {
-          this.sprite.frame = (this.sprite.frame + 1) % 2;
+          this.sprite.frameParity = (this.sprite.frameParity + 1) % 2;
+          this.sprite.frame = Math.abs(this.way*this.maxFrames - this.sprite.frameParity);
           this.animationDuration = 0;
         }
       },
       animationJump: function() {
         game.assets['s/jump1.mp3'].play();
         this.sprite.tl.moveY(275, 7);
-        this.sprite.frame = 2;
+        this.sprite.frame = Math.abs(this.way*this.maxFrames - 2);
         this.sprite.tl.moveY(415, 7);
       },
       animationAttackHand: function() {
         game.assets['s/slap1.mp3'].play();
         this.action = 'attackHand';
-        this.sprite.frame = 4;
+        this.sprite.frame = Math.abs(this.way*this.maxFrames - 4);
       },
       animationAttackFoot: function() {
         game.assets['s/kick2.mp3'].play();
         this.action = 'attackFoot';
-        this.sprite.frame = 3;
+        this.sprite.frame = Math.abs(this.way*this.maxFrames - 3);
       }
     }
   }
@@ -220,12 +233,16 @@ game.onload = function () {
         scW: 67,
         scImg: game.assets['ryu.png'],
         scX: 300,
+        way: 0,
+        frames: 10,
       },
       {
         scH: 91,
         scW: 66,
         scImg: game.assets['rick.png'],
         scX: 800,
+        way: 1,
+        frames: 12,
       }
     ]
 
