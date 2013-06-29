@@ -3,7 +3,7 @@ gamepad.init();
 
 enchant();
 var game = new Game(1136, 640);
-game.preload(['ground2.png', 'bg.jpg', 'pl4.png', 'ryu2.png', 'troll.jpg', 's/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3']);
+game.preload(['ground2.png', 'titlebg.png','bg.jpg', 'pl4.png', 'ryu2.png', 'troll.jpg', 's/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3']);
 
 var Character = {
 
@@ -152,7 +152,24 @@ var Character = {
 
 function titleScene(cb) {
   var scene = new Scene();
-  scene.backgroundColor = '#000';
+  
+  scene.backgroundColor = '000';
+
+  var bg = new Sprite(1136, 640);
+  bg.image = game.assets['titlebg.png'];
+  
+  bg.opacity = 0;
+  
+  var aD = 0
+  bg.addEventListener('enterframe', function(e) {
+      aD += e.elapsed;
+      if (aD >= 500) {
+        bg.opacity += 0.2;
+        aD = 0;
+      }
+    });
+
+  scene.addChild(bg);
   game.pushScene(scene);
   game.assets['s/intro.mp3'].play();
 
@@ -192,12 +209,12 @@ function titleScene(cb) {
         cb();
       }
     });
-  }, 4000);
+  }, 3000);
   
 }
 
 game.onload = function () {
- // titleScene(function() {
+  titleScene(function() {
     var scene = new Scene();
 
     console.log(scene);  
@@ -278,7 +295,7 @@ game.onload = function () {
     });
 
     game.pushScene(scene);
-//  });
+  });
   
 };
 
