@@ -8,7 +8,6 @@ game.preload(['ground2.png', 'bg.jpg', 'pl4.png', 'ryu2.png', 'troll.jpg', 's/ki
 var Character = {
 	create: function() {
 		var char = new Sprite(67, 83);
-  	console.log(char);
     char.image = game.assets['ryu2.png'];
     char.scale(2, 2);
   	char.y = 415;
@@ -91,12 +90,25 @@ function titleScene(cb) {
   game.assets['s/intro.mp3'].play();
 
   setTimeout(function(){
-    var label2 = new Label('PRESS SOMETHING');
+    var label2 = new Label('Press START Button');
     label2.width = '1136';
     label2.y = '48';
     label2.color = 'fff';
     label2.font = '40px monospace';
     label2.textAlign = 'center';
+    var aD = 0;
+    label2.addEventListener('enterframe', function(e) {
+      aD += e.elapsed;
+      if (aD >= 500) {
+        if(label2.color === 'fff') {
+          label2.color = '000';
+        } else {
+          label2.color = 'fff';
+        }
+        aD = 0;
+      }
+    });
+
     scene.addChild(label2);
 
     var label = new Label('Use gamepad for the best user experience!');
@@ -107,9 +119,11 @@ function titleScene(cb) {
     label.textAlign = 'center';
     scene.addChild(label);
     gamepad.bind(Gamepad.Event.BUTTON_DOWN, function(e) {
-      game.popScene();
-      gamepad.unbind(Gamepad.Event.BUTTON_DOWN);
-      cb();
+      if(e.control === 'START') {
+        game.popScene();
+        gamepad.unbind(Gamepad.Event.BUTTON_DOWN);
+        cb();
+      }
     });
   }, 4000);
   
