@@ -3,7 +3,8 @@ gamepad.init();
 
 enchant();
 var game = new Game(1136, 640);
-game.preload(['ground2.png', 'titlebg1.png', 'press_start.png','bg.jpg', 'pl4.png', 'ryu.png', 'rick.png', 'troll.jpg', 'andrew.png', 'const.png']);
+
+game.preload(['ground2.png', 'titlebg1.png', 'press_start.png','bg.jpg', 'pl4.png', 'ryu.png', 'rick.png', 'troll.jpg', 'andrew.png', 'const.png', 'bar.png']);
 game.preload(['s/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3', 's/mk.mp3', 's/block.mp3', 's/death.mp3']);
 
 var Character = {
@@ -42,7 +43,11 @@ var Character = {
         this.avatar = new Sprite(150, 150);
         this.avatar.image = params.avatar;
         this.avatar.x = params.avatarX;
+        this.HPbar = new Sprite(340, 50);
+        this.HPbar.image = game.assets['bar.png'];
+        this.HPbar.x = params.HPbarX;
 
+        this.scene.addChild(this.HPbar);
         this.scene.addChild(this.sprite);
         this.scene.addChild(this.hpLabel);
         this.scene.addChild(this.avatar);
@@ -471,7 +476,8 @@ game.onload = function () {
         hpLabelX: 30,
         hpLabelY: 30,
         avatar: game.assets['andrew.png'],
-        avatarX: 0
+        avatarX: 0,
+        HPbarX: 150
       },
       {
         scH: 91,
@@ -483,7 +489,8 @@ game.onload = function () {
         hpLabelX: 1030,
         hpLabelY: 30,
         avatar: game.assets['const.png'],
-        avatarX: 985
+        avatarX: 985,
+        HPbarX: 645
       }
     ];
 
