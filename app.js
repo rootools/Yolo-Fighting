@@ -3,7 +3,7 @@ gamepad.init();
 
 enchant();
 var game = new Game(1136, 640);
-game.preload(['ground2.png', 'titlebg1.png', 'press_start.png','bg.jpg', 'pl4.png', 'ryu.png', 'rick.png', 'troll.jpg', 's/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3', 's/mk.mp3']);
+game.preload(['ground2.png', 'titlebg1.png', 'press_start.png','bg.jpg', 'pl4.png', 'ryu.png', 'rick.png', 'troll.jpg', 's/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3', 's/mk.mp3', 's/block.mp3', 's/death.mp3']);
 
 var Character = {
 
@@ -201,7 +201,7 @@ var Character = {
               this.heJump = players[k].jump;
               this.heDead = players[k].isDead;
 
-              if (this.deltaX < 20 && this.deltaY < 20 && (!this.heBlock || this.heJump) && !this.heDead) {
+              if (this.deltaX < 20 && this.deltaY < 20 && !this.heDead) {
                 players[k].actionAttacked(50);
                 this.isAttacked = true;
               } else {
@@ -277,8 +277,9 @@ var Character = {
 
       animationStand: function(e) {
         this.animationDuration += e ? e.elapsed : 50;
-        if (this.animationDuration >= 250) {
-          this.sprite.frameParity = (this.sprite.frameParity + 1) % 2;
+        var runFrame = this.moveState ? 8 : 0;
+        if ((!this.moveState && this.animationDuration >= 250) || (this.moveState && this.animationDuration >= 100)) {
+          this.sprite.frameParity = (this.sprite.frameParity + 1) % 2 + runFrame;
           this.sprite.frame = Math.abs(this.way*this.maxFrames - this.sprite.frameParity);
           this.animationDuration = 0;
         }
@@ -294,6 +295,8 @@ var Character = {
       animationAttackHand: function() {
         if (this.isAttacked) {
           game.assets['s/slap1.mp3'].play();
+        } else if (this.heBlock) {
+          game.assets['s/block.mp3'].play();
         }
         this.sprite.frame = Math.abs(this.way*this.maxFrames - 4);
       },
@@ -306,6 +309,8 @@ var Character = {
       animationAttackFoot: function() {
         if (this.isAttacked) {
           game.assets['s/kick2.mp3'].play();
+        } else if (this.heBlock) {
+          game.assets['s/block.mp3'].play();
         }
         this.sprite.frame = Math.abs(this.way*this.maxFrames - 3);
       },
@@ -330,13 +335,11 @@ var Character = {
       },
       animationAttacked: function() {
         game.assets['s/slap1.mp3'].play();
-        this.sprite.frame = Math.abs(this.way*this.maxFrames - 4);
+        this.sprite.frame = Math.abs(this.way*this.maxFrames - 7);
       },
       animationDead: function() {
-        game.assets['s/jump1.mp3'].play();
-        game.assets['s/jump1.mp3'].play();
-        game.assets['s/jump1.mp3'].play();
-        this.sprite.frame = Math.abs(this.way*this.maxFrames - 2);
+        game.assets['s/death.mp3'].play();
+        this.sprite.frame = Math.abs(this.way*this.maxFrames - 10);
       },
     }
   }
@@ -414,7 +417,7 @@ game.onload = function () {
         scImg: game.assets['ryu.png'],
         scX: 300,
         way: 0,
-        frames: 14,
+        frames: 22,
         hpLabelX: 30,
         hpLabelY: 30,
       },
@@ -424,7 +427,7 @@ game.onload = function () {
         scImg: game.assets['rick.png'],
         scX: 800,
         way: 1,
-        frames: 14,
+        frames: 22,
         hpLabelX: 1030,
         hpLabelY: 30,
       }
@@ -538,8 +541,7 @@ game.onload = function () {
     }, 500);
   };
   
-  titleScene(fightStart());
-
+  titleScene(fightStart);
 
 };
 
