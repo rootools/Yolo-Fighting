@@ -14,6 +14,12 @@ var Character = {
       gamepad: params.gamepad,
       scene: params.scene,
       sprite: null,
+      block: false,
+      jump: false,
+      attack: false,
+      attacked: false,
+      isAttacked: false,
+      isDead: false,
 
       create: function() {
         this.sprite = new Sprite(params.scW, params.scH);
@@ -26,15 +32,22 @@ var Character = {
         this.speed = 10;
         this.maxFrames = params.frames - 1;
         this.way = params.way;
-        this.jump = false;
-        this.attack = false;
         this.action = 'run';
         this.HP = 100;
+        this.hpLabel = new Label(this.HP);
+        this.hpLabel.x = params.hpLabelX;
+        this.hpLabel.y = params.hpLabelY;
+        this.hpLabel.font = '30px bold';
 
         this.scene.addChild(this.sprite);
+        this.scene.addChild(this.hpLabel);
 
         var player = this;
         this.sprite.addEventListener('enterframe', function(e) {
+
+          if (player.isDead) {
+            return false;
+          }
 
           switch (player.action) {
             case 'jump':
@@ -44,6 +57,10 @@ var Character = {
 
             case 'attackHand':
               player.actionAttackHand();
+            break;
+
+            case 'attackMegaHand':
+              player.actionAttackMegaHand();
             break;
 
             case 'attackFoot':
@@ -97,7 +114,6 @@ var Character = {
 
         switch (this.moveState) {
           case 'right':
-          console.log(this.deltaWay);
             if (this.sprite.x < 1072 && (!(!this.way && this.deltaWay < 2) || this.jump)) {
               this.sprite.x += 10;
             }
@@ -120,24 +136,81 @@ var Character = {
           var player = this;
           setTimeout(function(){
             player.jump = false;
+            player.animationJumpDown();
             player.action = player.moveState ? 'run' : 'stop';
-          }, 200);
+          }, 400);
         
-          this.animationJump();
+          this.animationJumpUp();
         }
       },
       
       actionAttackHand: function() {
-        if (!this.attack) {
+        if (!this.attack && !this.attacked) {
           this.attack = true;
 
           var player = this;
           setTimeout(function(){
-            player.attack = false;
-            player.action = player.moveState ? 'run' : 'stop';
-          }, 200);
+            player.animationUnAttack();
+            setTimeout(function(){
+              player.attack = false;
+              player.action = player.moveState ? 'run' : 'stop';
+            }, 50);
+          }, 300);
+
+          for (k in players) {
+            if (players[k].pad.id !== this.pad.id) {
+              this.deltaX = Math.abs(this.sprite.x - players[k].sprite.x) - this.sprite.width/2 - players[k].sprite.width/2;
+              this.deltaY = Math.abs(this.sprite.y - players[k].sprite.y);
+              this.heBlock = players[k].block;
+              this.heAttack = players[k].attack;
+              this.heJump = players[k].jump;
+              this.heDead = players[k].isDead;
+
+              if (this.deltaX < 20 && this.deltaY < 20 && (!this.heBlock || this.heJump) && !this.heDead) {
+                players[k].actionAttacked(5);
+                this.isAttacked = true;
+              } else {
+                this.isAttacked = false;
+              }
+            }
+          }
 
           this.animationAttackHand();
+        }
+      },
+
+      actionAttackMegaHand: function() {
+        if (!this.attack && !this.attacked) {
+          this.attack = true;
+
+          var player = this;
+          setTimeout(function(){
+            player.animationUnAttack();
+            setTimeout(function(){
+              player.attack = false;
+              player.action = player.moveState ? 'run' : 'stop';
+            }, 50);
+          }, 800);
+
+          for (k in players) {
+            if (players[k].pad.id !== this.pad.id) {
+              this.deltaX = Math.abs(this.sprite.x - players[k].sprite.x) - this.sprite.width/2 - players[k].sprite.width/2;
+              this.deltaY = Math.abs(this.sprite.y - players[k].sprite.y);
+              this.heBlock = players[k].block;
+              this.heAttack = players[k].attack;
+              this.heJump = players[k].jump;
+              this.heDead = players[k].isDead;
+
+              if (this.deltaX < 20 && this.deltaY < 20 && (!this.heBlock || this.heJump) && !this.heDead) {
+                players[k].actionAttacked(50);
+                this.isAttacked = true;
+              } else {
+                this.isAttacked = false;
+              }
+            }
+          }
+
+          this.animationAttackMegaHand();
         }
       },
 
@@ -147,41 +220,124 @@ var Character = {
 
           var player = this;
           setTimeout(function(){
-            player.attack = false;
-            player.action = player.moveState ? 'run' : 'stop';
-          }, 200);
+            player.animationUnAttack();
+            setTimeout(function(){
+              player.attack = false;
+              player.action = player.moveState ? 'run' : 'stop';
+            }, 50);
+          }, 450);
+
+          for (k in players) {
+            if (players[k].pad.id !== this.pad.id) {
+              this.deltaWay = Math.abs(this.sprite.x - players[k].sprite.x) - this.sprite.width/2 - players[k].sprite.width/2;
+              this.deltaY = Math.abs(this.sprite.y - players[k].sprite.y);
+              this.heBlock = players[k].block;
+              this.heAttack = players[k].attack;
+              this.heJump = players[k].jump;
+              this.heDead = players[k].isDead;
+
+              if (this.deltaWay < 20 && this.deltaY < 40 && (!this.heBlock || this.heJump) && !this.heDead) {
+                players[k].actionAttacked(7);
+                this.isAttacked = true;
+              } else {
+                this.isAttacked = false;
+              }
+            }
+          }
 
           this.animationAttackFoot();
         }
       },
 
+      actionAttacked: function(deltaHP) {
+        if (!this.attacked) {
+          this.attacked = true;
+          this.HP -= deltaHP;
 
+          if (this.HP <= 0) {
+            this.HP = 0;
+            this.isDead = true;
+          }
+
+          this.hpLabel.text = this.HP;
+
+          if (!this.isDead) {
+            var player = this;
+            setTimeout(function(){
+              player.attacked = false;
+              player.action = player.moveState ? 'run' : 'stop';
+            }, 200);
+
+            this.animationAttacked();
+          } else {
+            this.animationDead();
+          }
+        }
+      },
 
       animationStand: function(e) {
-        this.animationDuration += e.elapsed;
+        this.animationDuration += e ? e.elapsed : 50;
         if (this.animationDuration >= 250) {
           this.sprite.frameParity = (this.sprite.frameParity + 1) % 2;
           this.sprite.frame = Math.abs(this.way*this.maxFrames - this.sprite.frameParity);
           this.animationDuration = 0;
         }
       },
-      animationJump: function() {
+      animationJumpUp: function() {
         game.assets['s/jump1.mp3'].play();
-        this.sprite.tl.moveY(275, 7);
+        this.sprite.tl.moveY(175, 15);
         this.sprite.frame = Math.abs(this.way*this.maxFrames - 2);
-        this.sprite.tl.moveY(415, 7);
+      },
+      animationJumpDown: function() {
+        this.sprite.tl.moveY(415, 15);
       },
       animationAttackHand: function() {
-        game.assets['s/slap1.mp3'].play();
+        if (this.isAttacked) {
+          game.assets['s/slap1.mp3'].play();
+        }
         this.sprite.frame = Math.abs(this.way*this.maxFrames - 4);
       },
+      animationAttackMegaHand: function() {
+        if (this.isAttacked) {
+          game.assets['s/slap1.mp3'].play();
+        }
+        this.sprite.frame = Math.abs(this.way*this.maxFrames - 6);
+      },
       animationAttackFoot: function() {
-        game.assets['s/kick2.mp3'].play();
+        if (this.isAttacked) {
+          game.assets['s/kick2.mp3'].play();
+        }
         this.sprite.frame = Math.abs(this.way*this.maxFrames - 3);
+      },
+      animationUnAttack: function() {
+        if (this.isDead) {
+          this.animationDead();
+        } else if (this.jump) {
+          this.sprite.frame = Math.abs(this.way*this.maxFrames - 2);
+        } else if (this.block) {
+          this.animationBlock();
+        } else if (this.attacked) {
+          this.animationAttacked();
+        } else if (this.moveState) {
+          this.animationStand();
+        } else {
+          this.animationStand();
+        }
+        
       },
       animationBlock: function() {
         this.sprite.frame = Math.abs(this.way*this.maxFrames - 5);
-      }
+      },
+      animationAttacked: function() {
+        game.assets['s/slap1.mp3'].play();
+        this.sprite.frame = Math.abs(this.way*this.maxFrames - 4);
+      },
+      animationDead: function() {
+        game.assets['s/jump1.mp3'].play();
+        game.assets['s/jump1.mp3'].play();
+        game.assets['s/jump1.mp3'].play();
+        this.sprite.frame = Math.abs(this.way*this.maxFrames - 2);
+      },
     }
   }
 };
@@ -242,16 +398,15 @@ function titleScene(cb) {
 }
 
 game.onload = function () {
-  titleScene(function() {
+  var fightStart = function() {
 
     var bgm = game.assets['s/mk.mp3'].play();
 
     var scene = new Scene();
 
-    console.log(scene);  
     var bg = new Sprite(1136, 640);
     bg.image = game.assets['bg.jpg'];
-    
+
     playersParams = [
       {
         scH: 83,
@@ -259,7 +414,9 @@ game.onload = function () {
         scImg: game.assets['ryu.png'],
         scX: 300,
         way: 0,
-        frames: 12,
+        frames: 14,
+        hpLabelX: 30,
+        hpLabelY: 30,
       },
       {
         scH: 91,
@@ -267,7 +424,9 @@ game.onload = function () {
         scImg: game.assets['rick.png'],
         scX: 800,
         way: 1,
-        frames: 12,
+        frames: 14,
+        hpLabelX: 1030,
+        hpLabelY: 30,
       }
     ]
 
@@ -293,8 +452,7 @@ game.onload = function () {
         }
       }
 
-      if (player === null) {
-        console.log(e);
+      if (player === null || players[player].attacked || players[player].isDead) {
         return false;
       }
 
@@ -330,6 +488,12 @@ game.onload = function () {
             players[player].action = 'block';
           }
         break;
+
+        case 'RB':
+          if (!players[player].attack && !players[player].jump) {
+            players[player].action = 'attackMegaHand';
+          }
+        break;
       }
 
     });
@@ -344,7 +508,6 @@ game.onload = function () {
       }
 
       if (player === null) {
-        console.log(e);
         return false;
       }
 
@@ -363,8 +526,21 @@ game.onload = function () {
     });
 
     game.pushScene(scene);
-  });
+
+    setTimeout(function() {
+      gamepad.bind(Gamepad.Event.BUTTON_DOWN, function(e) {
+        if(e.control === 'START') {
+          game.popScene();
+          gamepad.unbind(Gamepad.Event.BUTTON_DOWN);
+          fightStart();
+        }
+      });
+    }, 500);
+  };
   
+  titleScene(fightStart());
+
+
 };
 
 game.start();
