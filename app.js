@@ -3,7 +3,8 @@ gamepad.init();
 
 enchant();
 var game = new Game(1136, 640);
-game.preload(['ground2.png', 'titlebg1.png', 'press_start.png','bg.jpg', 'pl4.png', 'ryu.png', 'rick.png', 'troll.jpg', 's/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3', 's/mk.mp3', 's/block.mp3', 's/death.mp3', 'andrew.png', 'const.png']);
+game.preload(['ground2.png', 'titlebg1.png', 'press_start.png','bg.jpg', 'pl4.png', 'ryu.png', 'rick.png', 'troll.jpg', 'andrew.png', 'const.png']);
+game.preload(['s/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3', 's/mk.mp3', 's/block.mp3', 's/death.mp3']);
 
 var Character = {
 
@@ -53,6 +54,10 @@ var Character = {
             return false;
           }
 
+          if (player.heDead) {
+            player.action = 'complete';
+          }
+
           switch (player.action) {
             case 'jump':
               player.actionMove();
@@ -79,6 +84,10 @@ var Character = {
               player.actionUnBlock();
             break;
 
+            case 'complete':
+              player.animationDance();
+            break;
+
             default:
               player.actionMove();
               player.actionDefault(e);
@@ -94,6 +103,12 @@ var Character = {
           this.animationBlock();
         } else {
           this.animationStand(e);
+        }
+
+        for (k in players) {
+          if (players[k].pad.id !== this.pad.id) {
+            this.heDead = players[k].isDead;
+          }
         }
       },
 
@@ -351,9 +366,33 @@ var Character = {
         this.avatar.frame = 3;
         this.sprite.frame = Math.abs(this.way*this.maxFrames - 10);
       },
+      animationDance: function() {
+        if (!this.sprite.danced) {
+          this.sprite.danced = true;
+
+          this.sprite.frameSetDance = [
+            0, 1, 5, 21, 20, 16, 0, 1, 5, 21, 20, 16, 0, 1, 5, 21, 20, 16,
+  //          6, 6, 7, 15, 15, 14,
+          ];
+
+          window.time = 0;
+          this.sprite.addEventListener('enterframe', frameDancing);
+        }
+      },
     }
   }
 };
+
+window.frameDancing = function (e) {
+  time += e.elapsed;
+  var delay = 150;
+  var t = time - (time % delay);
+  this.frame = this.frameSetDance[t/delay];
+  if (this.frameSetDance.length-1 <= t/delay) {
+    this.danced = false;
+    this.removeEventListener('enterframe',frameDancing);
+  }
+}
 
 function titleScene(cb) {
   var scene = new Scene();
@@ -445,7 +484,7 @@ game.onload = function () {
         avatar: game.assets['const.png'],
         avatarX: 985
       }
-    ]
+    ];
 
     scene.addChild(bg);
     window.players = [];
