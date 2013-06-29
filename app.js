@@ -3,7 +3,7 @@ gamepad.init();
 
 enchant();
 var game = new Game(1136, 640);
-game.preload(['ground2.png', 'titlebg.png','bg.jpg', 'pl4.png', 'ryu2.png', 'troll.jpg', 's/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3', 's/mk.mp3']);
+game.preload(['ground2.png', 'titlebg.png','bg.jpg', 'pl4.png', 'ryu2.png', 'rick.png', 'troll.jpg', 's/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3', 's/mk.mp3']);
 
 var Character = {
 
@@ -224,14 +224,14 @@ game.onload = function () {
     
     playersParams = [
       {
-        scH: 67,
-        scW: 83,
+        scH: 83,
+        scW: 67,
         scImg: game.assets['ryu2.png'],
         scX: 30,
       },
       {
-        scH: 66,
-        scW: 91,
+        scH: 91,
+        scW: 66,
         scImg: game.assets['rick.png'],
         scX: 330,
       }
