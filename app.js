@@ -283,6 +283,7 @@ var Character = {
           if (!this.isDead) {
             var player = this;
             setTimeout(function(){
+              player.avatar.frame = 0;
               player.attacked = false;
               player.action = player.moveState ? 'run' : 'stop';
             }, 200);
