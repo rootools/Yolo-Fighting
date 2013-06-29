@@ -46,8 +46,18 @@ var Character = {
         this.HPbar = new Sprite(340, 50);
         this.HPbar.image = game.assets['bar.png'];
         this.HPbar.x = params.HPbarX;
+        this.HPbar.max = 312;
+        this.HPbarInner = new Sprite(312, 24);
+        this.HPbarInner.image = new Surface(312, 24);
+        this.HPbarInner.image.context.fillStyle = '#FF0000';
+        this.HPbarInner.image.context.fillRect(0, 0, 312, 24);
+        this.HPbar.startX = params.HPbarInnerX;
+        this.HPbarInner.x = params.HPbarInnerX;
+        this.HPbarInner.y = 13;
+        this.HPbarInvert = params.HPbarInvert;
 
         this.scene.addChild(this.HPbar);
+        this.scene.addChild(this.HPbarInner);
         this.scene.addChild(this.sprite);
         this.scene.addChild(this.hpLabel);
         this.scene.addChild(this.avatar);
@@ -191,7 +201,7 @@ var Character = {
               this.heDead = players[k].isDead;
 
               if (this.deltaX < 20 && this.deltaY < 20 && (!this.heBlock || this.heJump) && !this.heDead) {
-                players[k].actionAttacked(5);
+                players[k].actionAttacked(4);
                 this.isAttacked = true;
               } else {
                 this.isAttacked = false;
@@ -226,7 +236,7 @@ var Character = {
               this.heDead = players[k].isDead;
 
               if (this.deltaX < 20 && this.deltaY < 20 && !this.heDead) {
-                players[k].actionAttacked(50);
+                players[k].actionAttacked(24);
                 this.isAttacked = true;
               } else {
                 this.isAttacked = false;
@@ -261,7 +271,7 @@ var Character = {
               this.heDead = players[k].isDead;
 
               if (this.deltaWay < 20 && this.deltaY < 40 && (!this.heBlock || this.heJump) && !this.heDead) {
-                players[k].actionAttacked(7);
+                players[k].actionAttacked(8);
                 this.isAttacked = true;
               } else {
                 this.isAttacked = false;
@@ -366,11 +376,23 @@ var Character = {
         game.assets['s/slap1.mp3'].play();
         this.avatar.frame = 2;
         this.sprite.frame = Math.abs(this.way*this.maxFrames - 7);
+
+        this.HPbarInner.image.context.clearRect(0, 0, this.HPbar.max, 24);
+        this.HPbarInner.image.context.fillRect(0, 0, (this.HPbar.max * this.HP / 100), 24);
+        if (this.HPbarInvert) {
+          this.HPbarInner.x = this.HPbar.startX + this.HPbar.max - (this.HPbar.max * this.HP / 100);
+        }
       },
       animationDead: function() {
         game.assets['s/death.mp3'].play();
         this.avatar.frame = 3;
         this.sprite.frame = Math.abs(this.way*this.maxFrames - 10);
+
+        this.HPbarInner.image.context.clearRect(0, 0, this.HPbar.max, 24);
+        this.HPbarInner.image.context.fillRect(0, 0, (this.HPbar.max * this.HP / 100), 24);
+        if (this.HPbarInvert) {
+          this.HPbarInner.x = this.HPbar.startX + this.HPbar.max - (this.HPbar.max * this.HP / 100);
+        }
       },
       animationDance: function() {
         if (!this.sprite.danced) {
@@ -477,7 +499,9 @@ game.onload = function () {
         hpLabelY: 30,
         avatar: game.assets['andrew.png'],
         avatarX: 0,
-        HPbarX: 150
+        HPbarX: 150,
+        HPbarInnerX: 164,
+        HPbarInvert: false,
       },
       {
         scH: 91,
@@ -490,7 +514,9 @@ game.onload = function () {
         hpLabelY: 30,
         avatar: game.assets['const.png'],
         avatarX: 985,
-        HPbarX: 645
+        HPbarX: 645,
+        HPbarInnerX: 659,
+        HPbarInvert: true,
       }
     ];
 
