@@ -7,20 +7,19 @@ game.preload(['ground2.png', 'titlebg.png','bg.jpg', 'pl4.png', 'ryu2.png', 'tro
 
 var Character = {
 
-  init: function(pad, gamepad, scene) {
+  init: function(params) {
 
     return {
-      pad: gamepad.gamepads[pad],
-      gamepad: gamepad,
-      scene: scene,
+      pad: params.gamepad.gamepads[params.pad],
+      gamepad: params.gamepad,
+      scene: params.scene,
 
       create: function() {
-        console.log(this);
-        this.sprite = new Sprite(67, 83);
-        this.sprite.image = game.assets['ryu2.png'];
+        this.sprite = new Sprite(params.scW, params.scH);
+        this.sprite.image = params.scImg;
         this.sprite.scale(2, 2);
         this.sprite.y = 415;
-        this.sprite.x = 30;
+        this.sprite.x = params.scX;
         this.animationDuration = 0;
         this.speed = 10;
         this.jump = false;
@@ -223,10 +222,30 @@ game.onload = function () {
     var bg = new Sprite(1136, 640);
     bg.image = game.assets['bg.jpg'];
     
+    playersParams = [
+      {
+        scH: 67,
+        scW: 83,
+        scImg: game.assets['ryu2.png'],
+        scX: 30,
+      },
+      {
+        scH: 66,
+        scW: 91,
+        scImg: game.assets['rick.png'],
+        scX: 330,
+      }
+    ]
+
     scene.addChild(bg);
     window.players = [];
     for (pad in gamepad.gamepads) {
-      var player = Character.init(pad, gamepad, scene);
+      var params = playersParams[pad];
+      params.pad = pad;
+      params.gamepad = gamepad;
+      params.scene = scene;
+
+      var player = Character.init(params);
       players.push(player.create());
     }
 
