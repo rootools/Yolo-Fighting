@@ -293,10 +293,38 @@ Gamepad.Mapping = {
 			RIGHT_STICK: 11,
 			START: 9,
 			BACK: 8,
-			DPAD_UP: 12,
-			DPAD_DOWN: 13,
-			DPAD_LEFT: 14,
-			DPAD_RIGHT: 15,
+			DPAD_UP: function(gamepad) {
+				if (gamepad.axes.length > 4) {
+					var value = gamepad.axes[6];
+					return (value > 0) ? 1 : 0;
+				} else {
+					return gamepad.buttons[12]
+				}
+			},
+			DPAD_DOWN: function(gamepad) {
+				if (gamepad.axes.length > 4) {
+					var value = gamepad.axes[6];
+					return (value < 0) ? 1 : 0;
+				} else {
+					return gamepad.buttons[13]
+				}
+			},
+			DPAD_LEFT: function(gamepad) {
+				if (gamepad.axes.length > 4) {
+					var value = gamepad.axes[5];
+					return (value < 0) ? 1 : 0;
+				} else {
+					return gamepad.buttons[14]
+				}
+			},
+			DPAD_RIGHT: function(gamepad) {
+				if (gamepad.axes.length > 4) {
+					var value = gamepad.axes[5];
+					return (value > 0) ? 1 : 0;
+				} else {
+					return gamepad.buttons[15]
+				}
+			},
       		HOME: 16
 		},
 		axes: {
@@ -656,7 +684,7 @@ Gamepad.prototype._resolveControllerType = function(id) {
 		|| id.indexOf('wireless gamepad') !== -1
 	) {
 		return Gamepad.Type.LOGITECH;
-	} else if (id.indexOf('xbox') !== -1 || id.indexOf('360') !== -1 || id.indexOf('Microsoft') !== -1) {
+	} else if (id.indexOf('xbox') !== -1 || id.indexOf('360') !== -1 || id.indexOf('microsoft') !== -1) {
 		return Gamepad.Type.XBOX;
 	} else {
 		return Gamepad.Type.GAMEPAD;
@@ -712,7 +740,7 @@ Gamepad.prototype._update = function() {
 			for (j = 0; j < this.gamepads[i].downButtons.length; j++) {
 				if (this.gamepads[i].downButtons[j] === controlName) {
 					lastDown = true;
-					downBtnIndex = i;
+					downBtnIndex = j;
 
 					break;
 				}

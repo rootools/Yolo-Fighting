@@ -85,7 +85,6 @@ var Character = {
 
           var player = this;
           setTimeout(function(){
-            console.log(player);
             player.jump = false;
             player.action = player.moveState ? 'run' : 'stop';
           }, 200);
@@ -233,9 +232,10 @@ game.onload = function () {
 
     gamepad.bind(Gamepad.Event.BUTTON_DOWN, function(e) {
       var player = null;
+
       for (k in players) {
         if (e.gamepad.id === players[k].pad.id) {
-          player = players[k];
+          player = k;
           break;
         }
       }
@@ -247,28 +247,28 @@ game.onload = function () {
 
       switch (e.control) {
         case 'DPAD_RIGHT':
-          player.moveState = 'right';
+          players[player].moveState = 'right';
         break;
 
         case 'DPAD_LEFT':
-          player.moveState = 'left';
+          players[player].moveState = 'left';
         break;
 
         case 'A':
-          if (!player.attack && !player.jump) {
-            player.action = 'jump';
+          if (!players[player].attack && !players[player].jump) {
+            players[player].action = 'jump';
           }
         break;
 
         case 'X':
-          if (!player.attack) {
-            player.action = 'attackHand';
+          if (!players[player].attack) {
+            players[player].action = 'attackHand';
           }
         break;
 
         case 'Y':
-          if (!player.attack) {
-            player.action = 'attackFoot';
+          if (!players[player].attack) {
+            players[player].action = 'attackFoot';
           }
         break;
       }
@@ -279,7 +279,7 @@ game.onload = function () {
       var player = null;
       for (k in players) {
         if (e.gamepad.id === players[k].pad.id) {
-          player = players[k];
+          player = k;
           break;
         }
       }
@@ -291,8 +291,10 @@ game.onload = function () {
 
       switch (e.control) {
         case 'DPAD_RIGHT':
+          players[player].moveState = false;
+        break;
         case 'DPAD_LEFT':
-          player.moveState = false;
+          players[player].moveState = false;
         break;
       }
     });
