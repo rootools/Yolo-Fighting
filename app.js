@@ -227,13 +227,13 @@ game.onload = function () {
         scH: 83,
         scW: 67,
         scImg: game.assets['ryu2.png'],
-        scX: 30,
+        scX: 300,
       },
       {
         scH: 91,
         scW: 66,
         scImg: game.assets['rick.png'],
-        scX: 330,
+        scX: 800,
       }
     ]
 
