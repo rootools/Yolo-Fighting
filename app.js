@@ -50,6 +50,14 @@ var Character = {
               player.actionAttackFoot();
             break;
 
+            case 'block':
+              player.actionBlock();
+            break;
+
+            case 'unblock':
+              player.actionUnBlock();
+            break;
+
             default:
               player.actionMove();
               player.actionDefault(e);
@@ -61,7 +69,22 @@ var Character = {
       },
       
       actionDefault: function(e) {
-        this.animationStand(e);
+        if (this.block) {
+          this.animationBlock();
+        } else {
+          this.animationStand(e);
+        }
+      },
+
+      actionBlock: function() {
+          this.block = true;
+          this.animationBlock();
+          this.action = this.moveState ? 'run' : 'stop';
+      },
+
+      actionUnBlock: function() {
+          this.block = false;
+          this.action = this.moveState ? 'run' : 'stop';
       },
 
       actionMove: function() {
@@ -133,6 +156,7 @@ var Character = {
       },
 
 
+
       animationStand: function(e) {
         this.animationDuration += e.elapsed;
         if (this.animationDuration >= 250) {
@@ -149,13 +173,14 @@ var Character = {
       },
       animationAttackHand: function() {
         game.assets['s/slap1.mp3'].play();
-        this.action = 'attackHand';
         this.sprite.frame = Math.abs(this.way*this.maxFrames - 4);
       },
       animationAttackFoot: function() {
         game.assets['s/kick2.mp3'].play();
-        this.action = 'attackFoot';
         this.sprite.frame = Math.abs(this.way*this.maxFrames - 3);
+      },
+      animationBlock: function() {
+        this.sprite.frame = Math.abs(this.way*this.maxFrames - 5);
       }
     }
   }
@@ -299,6 +324,12 @@ game.onload = function () {
             players[player].action = 'attackFoot';
           }
         break;
+
+        case 'B':
+          if (!players[player].attack && !players[player].jump) {
+            players[player].action = 'block';
+          }
+        break;
       }
 
     });
@@ -319,10 +350,14 @@ game.onload = function () {
 
       switch (e.control) {
         case 'DPAD_RIGHT':
-          players[player].moveState = false;
-        break;
         case 'DPAD_LEFT':
           players[player].moveState = false;
+        break;
+
+        case 'B':
+          if (!players[player].attack) {
+            players[player].action = 'unblock';
+          }
         break;
       }
     });
