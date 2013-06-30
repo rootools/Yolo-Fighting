@@ -617,7 +617,7 @@ function creditsScene() {
   i1.addEventListener('enterframe', function(e) {
     
     bD += e.elapsed;
-      if (bD >= 500) {
+      if (bD >= 5500) {
         i1.frame += 1;
         i2.frame += 1;
         i3.frame += 1;
@@ -794,7 +794,7 @@ game.onload = function () {
       
     scene.addChild(vislov);
 
-    setInterval(function(){
+    setTimeout(function(){
       
       vislov.tl.rotateBy(-30, 1);;
       game.assets['s/toasty.mp3'].play();
