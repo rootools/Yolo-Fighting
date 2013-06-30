@@ -4,7 +4,7 @@ gamepad.init();
 enchant();
 var game = new Game(1136, 640);
 
-game.preload(['ground2.png', 'titlebg1.png', 'press_start.png','bg.jpg', 'pl4.png', 'ryu.png', 'rick.png', 'troll.jpg', 'andrew.png', 'const.png', 'bar.png', 'python.png', 'ruby.png', 'vislov.png', 'github.png']);
+game.preload(['ground2.png', 'titlebg1.png', 'press_start.png','bg.jpg', 'pl4.png', 'ryu.png', 'rick.png', 'troll.jpg', 'andrew.png', 'const.png', 'bar.png', 'python.png', 'ruby.png', 'vislov.png', 'github.png', 'eyes.png', 'noses.png', 'chins.png']);
 game.preload(['s/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3', 's/mk.mp3', 's/block.mp3', 's/death.mp3', 's/toasty.mp3', 's/nyan.mp3']);
 
 
@@ -566,6 +566,7 @@ function titleScene(cb) {
 }
 
 function creditsScene() {
+  game.assets['s/mk.mp3'].stop();
   var scene = new Scene();
   game.assets['s/nyan.mp3'].play();
 
@@ -574,15 +575,19 @@ function creditsScene() {
   gh.x = 1200;
   gh.y = 550;
   
-  var i1 = new Sprite(150, 150);
-  var i2 = new Sprite(150, 150);
-  var i3 = new Sprite(150, 150);
+  var i1 = new Sprite(433, 350);
+  var i2 = new Sprite(433, 98);
+  var i3 = new Sprite(433, 215);
 
-  i1.image = game.assets['andrew.png'];
-  i2.image = game.assets['const.png'];
-  i3.image = game.assets['andrew.png'];
-  i2.y = 150;
-  i3.y = 300;
+  i1.image = game.assets['eyes.png'];
+  i2.image = game.assets['noses.png'];
+  i3.image = game.assets['chins.png'];
+  i2.y = 350;
+  i3.y = 448;
+  i1.x = 350;
+  i2.x = 350;
+  i3.x = 350;
+
 
   i1.frame = 0;
   i2.frame = 1;
@@ -782,20 +787,22 @@ game.onload = function () {
       });
     }, 500);
   
-    setInterval(function(){
-      var vislov = new Sprite(350, 350);
-      vislov.image = game.assets['vislov.png'];
-      vislov.x = 800;
-      vislov.y = 750;
+    var vislov = new Sprite(350, 350);
+    vislov.image = game.assets['vislov.png'];
+    vislov.x = 800;
+    vislov.y = 750;
       
-      scene.addChild(vislov);
+    scene.addChild(vislov);
+
+    setInterval(function(){
+      
       vislov.tl.rotateBy(-30, 1);;
       game.assets['s/toasty.mp3'].play();
       vislov.tl.moveY(360, 5);
       setTimeout(function(){
         vislov.tl.moveY(750, 3);
       }, 2000);
-    }, 50000);
+    }, 25000);
 
   };
   
