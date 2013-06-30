@@ -22,6 +22,7 @@ var Character = {
       attacked: false,
       isAttacked: false,
       isDead: false,
+      specialUnit: null,
 
       create: function() {
         this.sprite = new Sprite(params.scW, params.scH);
@@ -59,6 +60,9 @@ var Character = {
         this.specialUnit.y = params.specialY;
         this.specialUnit.image = params.specialImg;
         this.specialUnit.scale(2, 2);
+        this.specialUnit.specialLock = false;
+        this.specialUnit.specialLockTime = 0;
+        this.specialUnit.specialLockBaseTime = 5000;
 
         this.scene.addChild(this.HPbar);
         this.scene.addChild(this.HPbarInner);
@@ -75,6 +79,14 @@ var Character = {
 
           if (player.heDead) {
             player.action = 'complete';
+          }
+
+          if (player.specialUnit.specialLock) {
+            player.specialUnit.specialLockTime += e.elapsed;
+            if (player.specialUnit.specialLockTime > player.specialUnit.specialLockBaseTime) {
+              player.specialUnit.specialLock = false;
+              player.specialUnit.specialLockTime = 0;
+            }
           }
 
           switch (player.action) {
@@ -220,6 +232,7 @@ var Character = {
       actionAttackMegaHand: function() {
         if (!this.attack && !this.attacked) {
           this.attack = true;
+          this.specialUnit.specialLock = true;
 
           var _this = this;
           setTimeout(function(){
@@ -655,7 +668,7 @@ game.onload = function () {
         break;
 
         case 'RB':
-          if (!players[player].attack && !players[player].jump) {
+          if (!players[player].attack && !players[player].jump && !players[player].specialUnit.specialLock) {
             players[player].action = 'attackMegaHand';
           }
         break;
