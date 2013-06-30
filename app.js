@@ -4,7 +4,7 @@ gamepad.init();
 enchant();
 var game = new Game(1136, 640);
 
-game.preload(['ground2.png', 'titlebg1.png', 'press_start.png','bg.jpg', 'pl4.png', 'ryu.png', 'rick.png', 'troll.jpg', 'andrew.png', 'const.png', 'bar.png']);
+game.preload(['ground2.png', 'titlebg1.png', 'press_start.png','bg.jpg', 'pl4.png', 'ryu.png', 'rick.png', 'troll.jpg', 'andrew.png', 'const.png', 'bar.png', 'python.png', 'ruby.png']);
 game.preload(['s/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3', 's/mk.mp3', 's/block.mp3', 's/death.mp3']);
 
 var Character = {
@@ -55,6 +55,9 @@ var Character = {
         this.HPbarInner.x = params.HPbarInnerX;
         this.HPbarInner.y = 13;
         this.HPbarInvert = params.HPbarInvert;
+        this.specialUnit = new Sprite(params.specialW, params.specialH);
+        this.specialUnit.y = params.specialY;
+        this.specialUnit.image = params.specialImg;
 
         this.scene.addChild(this.HPbar);
         this.scene.addChild(this.HPbarInner);
@@ -141,7 +144,7 @@ var Character = {
       actionMove: function() {
         for (k in players) {
           if (players[k].pad.id !== this.pad.id) {
-            this.way = (this.sprite.x > players[k].sprite.x);
+            this.way = (this.sprite.x > players[k].sprite.x) ? 1 : 0;
             this.deltaWay = Math.abs(this.sprite.x - players[k].sprite.x) - this.sprite.width/2 - players[k].sprite.width/2;
           }
         }
@@ -217,12 +220,12 @@ var Character = {
         if (!this.attack && !this.attacked) {
           this.attack = true;
 
-          var player = this;
+          var _this = this;
           setTimeout(function(){
-            player.animationUnAttack();
+            _this.animationUnAttack();
             setTimeout(function(){
-              player.attack = false;
-              player.action = player.moveState ? 'run' : 'stop';
+              _this.attack = false;
+              _this.action = _this.moveState ? 'run' : 'stop';
             }, 50);
           }, 800);
 
@@ -235,16 +238,20 @@ var Character = {
               this.heJump = players[k].jump;
               this.heDead = players[k].isDead;
 
-              if (this.deltaX < 20 && this.deltaY < 20 && !this.heDead) {
-                players[k].actionAttacked(24);
-                this.isAttacked = true;
-              } else {
-                this.isAttacked = false;
-              }
+              var player = players[k];
+              var specFrame1 = Math.abs(this.way*3);
+              var specFrame2 = Math.abs(this.way*3 - 1);
+
+              this.animationSpecialAttack(player);
+
+              this.specialUnit.actSpecialAttackListener = function(e) {
+                actSpecialAttack(this, player, specFrame1, specFrame2, e);
+              };
+
+              this.specialUnit.addEventListener('enterframe', this.specialUnit.actSpecialAttackListener);
             }
           }
 
-          this.animationAttackMegaHand();
         }
       },
 
@@ -310,6 +317,28 @@ var Character = {
         }
       },
 
+      animationSpecialAttack: function(player) {
+        if (this.isAttacked) {
+          this.avatar.frame = 1;
+          game.assets['s/slap1.mp3'].play();
+        }
+        this.sprite.frame = Math.abs(this.way*this.maxFrames - 6);
+
+        this.specialUnit.removeEventListener('enterframe', this.specialUnit.actSpecialAttackListener);
+        this.scene.removeChild(this.specialUnit);
+
+        this.specialUnit.x = this.sprite.x + (-this.way) * this.sprite.width + this.sprite.width/2 + (-this.way) * this.specialUnit.width + this.specialUnit.width/2;
+        this.specialUnit.frame = Math.abs(this.way*3);
+        this.scene.addChild(this.specialUnit);
+
+        this.specialUnit.tl.clear();
+        if (this.way) {
+          this.specialUnit.tl.moveX(0, 150);
+        } else {
+          this.specialUnit.tl.moveX(1136, 150);
+        }
+      },
+
       animationStand: function(e) {
         this.animationDuration += e ? e.elapsed : 50;
         var runFrame = this.moveState ? 8 : 0;
@@ -335,13 +364,6 @@ var Character = {
           game.assets['s/block.mp3'].play();
         }
         this.sprite.frame = Math.abs(this.way*this.maxFrames - 4);
-      },
-      animationAttackMegaHand: function() {
-        if (this.isAttacked) {
-          this.avatar.frame = 1;
-          game.assets['s/slap1.mp3'].play();
-        }
-        this.sprite.frame = Math.abs(this.way*this.maxFrames - 6);
       },
       animationAttackFoot: function() {
         if (this.isAttacked) {
@@ -383,6 +405,7 @@ var Character = {
           this.HPbarInner.x = this.HPbar.startX + this.HPbar.max - (this.HPbar.max * this.HP / 100);
         }
       },
+
       animationDead: function() {
         game.assets['s/death.mp3'].play();
         this.avatar.frame = 3;
@@ -419,6 +442,49 @@ window.frameDancing = function (e) {
   if (this.frameSetDance.length-1 <= t/delay) {
     this.danced = false;
     this.removeEventListener('enterframe',frameDancing);
+  }
+}
+
+window.actSpecialAttack = function (specialUnit, player, specFrame1, specFrame2, e) {
+  if (!specialUnit.elapsed) {
+    specialUnit.elapsed = 0;
+  }
+  specialUnit.elapsed += e.elapsed;
+  if (specialUnit.elapsed > 40) {
+    specialUnit.parity = specialUnit.parity ? 0 : 1;
+    specialUnit.frame = specialUnit.parity ? specFrame1 : specFrame2;
+    specialUnit.elapsed = 0;
+  }
+  var specialEnd = false;
+  if (specialUnit.x < player.sprite.x) {
+    var playerX = player.sprite.x;
+    var specialUnitX = specialUnit.x + specialUnit.width;
+    var playerY = player.sprite.y + player.sprite.height;
+    var specialUnitY = specialUnit.y;
+    if (playerX - specialUnitX < 1 && playerX - specialUnitX > -specialUnit.width && specialUnitY - playerY < 1 && specialUnitY - playerY > -player.sprite.height) {
+      player.actionAttacked(24);
+      specialEnd = true;
+    }
+  } else {
+    var playerX = player.sprite.x + player.sprite.width;
+    var specialUnitX = specialUnit.x;
+    var playerY = player.sprite.y + player.sprite.height;
+    var specialUnitY = specialUnit.y;
+
+    if (specialUnitX - playerX < 1 && specialUnitX - playerX > -specialUnit.width && specialUnitY - playerY < 1 && specialUnitY - playerY > -player.sprite.height) {
+      player.actionAttacked(24);
+      specialEnd = true;
+    }
+  }
+
+  if (specialUnit.x <= 0 || specialUnit.x >= 1136) {
+    specialEnd = true;
+  }
+
+  if (specialEnd) {
+    specialUnit.removeEventListener('enterframe', specialUnit.actSpecialAttackListener);
+
+    player.scene.removeChild(specialUnit);
   }
 }
 
@@ -502,6 +568,10 @@ game.onload = function () {
         HPbarX: 150,
         HPbarInnerX: 164,
         HPbarInvert: false,
+        specialImg: game.assets['ruby.png'],
+        specialY: 450,
+        specialW: 34,
+        specialH: 24,
       },
       {
         scH: 91,
@@ -517,6 +587,10 @@ game.onload = function () {
         HPbarX: 645,
         HPbarInnerX: 659,
         HPbarInvert: true,
+        specialImg: game.assets['python.png'],
+        specialY: 490,
+        specialW: 28,
+        specialH: 24,
       }
     ];
 
