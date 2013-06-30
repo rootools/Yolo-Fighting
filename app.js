@@ -4,8 +4,8 @@ gamepad.init();
 enchant();
 var game = new Game(1136, 640);
 
-game.preload(['ground2.png', 'titlebg1.png', 'press_start.png','bg.jpg', 'pl4.png', 'ryu.png', 'rick.png', 'troll.jpg', 'andrew.png', 'const.png', 'bar.png', 'python.png', 'ruby.png']);
-game.preload(['s/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3', 's/mk.mp3', 's/block.mp3', 's/death.mp3']);
+game.preload(['ground2.png', 'titlebg1.png', 'press_start.png','bg.jpg', 'pl4.png', 'ryu.png', 'rick.png', 'troll.jpg', 'andrew.png', 'const.png', 'bar.png', 'python.png', 'ruby.png', 'vislov.png']);
+game.preload(['s/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3', 's/mk.mp3', 's/block.mp3', 's/death.mp3', 's/toasty.mp3']);
 
 var Character = {
 
@@ -451,7 +451,7 @@ window.actSpecialAttack = function (specialUnit, player, specFrame1, specFrame2,
     specialUnit.elapsed = 0;
   }
   specialUnit.elapsed += e.elapsed;
-  if (specialUnit.elapsed > 40) {
+  if (specialUnit.elapsed > 140) {
     specialUnit.parity = specialUnit.parity ? 0 : 1;
     specialUnit.frame = specialUnit.parity ? specFrame1 : specFrame2;
     specialUnit.elapsed = 0;
@@ -547,7 +547,7 @@ function titleScene(cb) {
 game.onload = function () {
   var fightStart = function() {
 
-    var bgm = game.assets['s/mk.mp3'].play();
+    game.assets['s/mk.mp3'].play();
 
     var scene = new Scene();
 
@@ -701,6 +701,22 @@ game.onload = function () {
         }
       });
     }, 500);
+  
+    setInterval(function(){
+      var vislov = new Sprite(350, 350);
+      vislov.image = game.assets['vislov.png'];
+      vislov.x = 800;
+      vislov.y = 750;
+      
+      scene.addChild(vislov);
+      vislov.tl.rotateBy(-30, 1);;
+      game.assets['s/toasty.mp3'].play();
+      vislov.tl.moveY(360, 5);
+      setTimeout(function(){
+        vislov.tl.moveY(750, 3);
+      }, 2000);
+    }, 50000);
+
   };
   
   titleScene(fightStart);
