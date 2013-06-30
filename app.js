@@ -617,7 +617,7 @@ function creditsScene() {
   i1.addEventListener('enterframe', function(e) {
     
     bD += e.elapsed;
-      if (bD >= 5500) {
+      if (bD >= 390) {
         i1.frame += 1;
         i2.frame += 1;
         i3.frame += 1;
