@@ -58,6 +58,7 @@ var Character = {
         this.specialUnit = new Sprite(params.specialW, params.specialH);
         this.specialUnit.y = params.specialY;
         this.specialUnit.image = params.specialImg;
+        this.specialUnit.scale(2, 2);
 
         this.scene.addChild(this.HPbar);
         this.scene.addChild(this.HPbarInner);
@@ -333,9 +334,9 @@ var Character = {
 
         this.specialUnit.tl.clear();
         if (this.way) {
-          this.specialUnit.tl.moveX(0, 150);
+          this.specialUnit.tl.moveX(0, 75);
         } else {
-          this.specialUnit.tl.moveX(1136, 150);
+          this.specialUnit.tl.moveX(1136, 75);
         }
       },
 
