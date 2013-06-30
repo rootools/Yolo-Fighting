@@ -4,8 +4,9 @@ gamepad.init();
 enchant();
 var game = new Game(1136, 640);
 
-game.preload(['ground2.png', 'titlebg1.png', 'press_start.png','bg.jpg', 'pl4.png', 'ryu.png', 'rick.png', 'troll.jpg', 'andrew.png', 'const.png', 'bar.png', 'python.png', 'ruby.png', 'vislov.png']);
-game.preload(['s/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3', 's/mk.mp3', 's/block.mp3', 's/death.mp3', 's/toasty.mp3']);
+game.preload(['ground2.png', 'titlebg1.png', 'press_start.png','bg.jpg', 'pl4.png', 'ryu.png', 'rick.png', 'troll.jpg', 'andrew.png', 'const.png', 'bar.png', 'python.png', 'ruby.png', 'vislov.png', 'github.png']);
+game.preload(['s/kick2.mp3', 's/slap1.mp3', 's/jump1.mp3', 's/intro.mp3', 's/mk.mp3', 's/block.mp3', 's/death.mp3', 's/toasty.mp3', 's/nyan.mp3']);
+
 
 var Character = {
 
@@ -117,6 +118,13 @@ var Character = {
 
             case 'complete':
               player.animationDance();
+              gamepad.bind(Gamepad.Event.BUTTON_DOWN, function(e) {
+                if(e.control === 'BACK') {
+                  game.popScene();
+                  gamepad.unbind(Gamepad.Event.BUTTON_DOWN);
+                  creditsScene();
+                }
+              });
             break;
 
             default:
@@ -557,7 +565,65 @@ function titleScene(cb) {
   
 }
 
+function creditsScene() {
+  var scene = new Scene();
+  game.assets['s/nyan.mp3'].play();
+
+  var gh = new Sprite(1000, 50);
+  gh.image = game.assets['github.png'];
+  gh.x = 1200;
+  gh.y = 550;
+  
+  var i1 = new Sprite(150, 150);
+  var i2 = new Sprite(150, 150);
+  var i3 = new Sprite(150, 150);
+
+  i1.image = game.assets['andrew.png'];
+  i2.image = game.assets['const.png'];
+  i3.image = game.assets['andrew.png'];
+  i2.y = 150;
+  i3.y = 300;
+
+  i1.frame = 0;
+  i2.frame = 1;
+  i3.frame = 2;
+
+  scene.backgroundColor = '000';
+  scene.addChild(i1);
+  scene.addChild(i2);
+  scene.addChild(i3);
+  scene.addChild(gh);
+  game.pushScene(scene);
+
+  var aD = 0;
+  var bD = 0;
+  gh.addEventListener('enterframe', function(e) {
+    aD += e.elapsed;
+      if (aD >= 100) {
+        
+        gh.x -= 10;
+        aD = 0;
+        if(gh.x <= -1010 ) {
+          gh.x = 1200;
+        }
+      }
+  });
+
+  i1.addEventListener('enterframe', function(e) {
+    
+    bD += e.elapsed;
+      if (bD >= 500) {
+        i1.frame += 1;
+        i2.frame += 1;
+        i3.frame += 1;
+        bD = 0;
+      }
+  });
+
+}
+
 game.onload = function () {
+
   var fightStart = function() {
 
     game.assets['s/mk.mp3'].play();
@@ -707,6 +773,7 @@ game.onload = function () {
 
     setTimeout(function() {
       gamepad.bind(Gamepad.Event.BUTTON_DOWN, function(e) {
+        
         if(e.control === 'START') {
           game.popScene();
           gamepad.unbind(Gamepad.Event.BUTTON_DOWN);
